@@ -103,6 +103,23 @@ public extension Response {
             if data.count < 1 && !failsOnEmptyData {
                 return NSNull()
             }
+            
+            if data.count > 0 {
+                var text: String
+                text = String(data: data, encoding: .utf8) ?? "{}"
+                
+                if text.contains("\\n") == false && text.contains("\n") {
+                    text = text.replacingOccurrences(of: "\n", with: "\\n")
+                }
+                
+                if let newData = text.data(using: .utf8, allowLossyConversion: false) {
+                    do {
+                        return try JSONSerialization.jsonObject(with: newData, options: .allowFragments)
+                    } catch {
+                    }
+                }
+            }
+            
             throw MoyaError.jsonMapping(self)
         }
     }
